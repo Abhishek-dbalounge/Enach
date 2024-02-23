@@ -1,12 +1,10 @@
 package com.enach.Models;
 
-import jakarta.persistence.Column;
 import lombok.Data;
 
 import java.util.Date;
 
 @Data
-//@Builder
 public class OtpVerifyResponse extends CommonResponse {
 
     private String custName;
@@ -15,7 +13,7 @@ public class OtpVerifyResponse extends CommonResponse {
     private String email;
     private Date startDate;
     private Date expiryDate;
-    private String amount;
+    private Double custDebitAmount;
 
 
 
@@ -26,6 +24,6 @@ public class OtpVerifyResponse extends CommonResponse {
         this.email = "";
         this.startDate = null;
         this.expiryDate = null;
-        this.amount = "";
+        this.custDebitAmount = null;
     }
 }

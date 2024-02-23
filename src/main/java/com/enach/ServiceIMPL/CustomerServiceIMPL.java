@@ -1,63 +1,61 @@
 package com.enach.ServiceIMPL;
 
 
-import com.enach.Entity.CustomerDetails;
 import com.enach.Entity.OtpDetails;
-import com.enach.Entity.ReqStrDetails;
-import com.enach.Models.ReqStrDetailsResponse;
-import com.enach.Repository.CustomerDetailsRepository;
+import com.enach.Models.CustomerDetails;
 import com.enach.Repository.OtpDetailsRepository;
-import com.enach.Repository.ReqStrDetailsRepository;
 import com.enach.Service.CoustomerService;
-import com.enach.Utill.EncryptionAES256;
 import com.enach.Utill.OtpUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
-import static com.enach.Utill.SHA256.getSHA;
-import static com.enach.Utill.SHA256.toHexString;
 
 
 @Service
 public class CustomerServiceIMPL implements CoustomerService {
 
+
     @Autowired
-    private CustomerDetailsRepository customerDetailsRepository;
+    @Qualifier("jdbcJdbcTemplate")
+    private JdbcTemplate jdbcTemplate;
+
+
     @Autowired
     private OtpUtility otpUtility;
     @Autowired
     private OtpDetailsRepository otpDetailsRepository;
-    @Autowired
-    private ReqStrDetailsRepository reqStrDetailsRepository;
 
     Logger logger = LoggerFactory.getLogger(OncePerRequestFilter.class);
 
-    public HashMap validateAndSendOtp(String loanNo) {
+
+    @Override
+    public HashMap<String, String> validateCustAndSendOtp(String loanNo) {
+
         HashMap<String, String> otpResponse = new HashMap<>();
-        CustomerDetails customerDetails = new CustomerDetails();
 
+        String sql = "SELECT * FROM customer_details WHERE loan_no='"+loanNo+"';";
         try {
+            List<CustomerDetails>  listData = jdbcTemplate.query(sql,new BeanPropertyRowMapper<>(CustomerDetails.class));
 
+            if(!listData.isEmpty() && listData.size()>0) {
+                CustomerDetails customerDetails = listData.get(0);
 
-          customerDetails = customerDetailsRepository.findByLoanNo(loanNo);
+                int otpCode = otpUtility.generateCustOtp(customerDetails);
 
-            if (customerDetails != null) {
-                int otpCode = otpUtility.generateOtp(customerDetails);
+                if(otpCode >0){
 
-                if (otpCode > 0) {
                     logger.info("otp generated successfully");
-               //    if (otpUtility.sendOtp(customerDetails.getMobileNo(), otpCode)) {
+                 //   if (otpUtility.sendOtp(customerDetails.getMobileNo(), otpCode)) {
                     logger.info("otp sent on mobile");
 
                     OtpDetails otpDetails = new OtpDetails();
@@ -75,10 +73,10 @@ public class CustomerServiceIMPL implements CoustomerService {
                     otpResponse.put("msg", "Otp send.");
                     otpResponse.put("code", "0000");
 
-            //     } else {
-            //        otpResponse.put("msg", "Otp did not send, please try again");
-            //        otpResponse.put("code", "1111");
-            //    }
+                  //     } else {
+                  //         otpResponse.put("msg", "Otp did not send, please try again");
+                  //         otpResponse.put("code", "1111");
+                  //     }
 
                 } else {
                     otpResponse.put("msg", "Otp did not generated, please try again");
@@ -89,13 +87,14 @@ public class CustomerServiceIMPL implements CoustomerService {
                 otpResponse.put("msg", "Loan no not found");
                 otpResponse.put("code", "1111");
             }
+
         } catch (Exception e) {
             System.out.println(e);
         }
         return otpResponse;
-
-
     }
+
+
 
     @Override
     public CustomerDetails getCustomerDetail(String mobileNo, String otpCode) {
@@ -104,8 +103,17 @@ public class CustomerServiceIMPL implements CoustomerService {
         try {
             OtpDetails otpDetails = otpDetailsRepository.IsotpExpired(mobileNo, otpCode);
             if (otpDetails != null) {
+                String sql = "SELECT * FROM customer_details WHERE mobile_no='"+mobileNo+"';";
+                List<CustomerDetails> listData = jdbcTemplate.query(sql,new BeanPropertyRowMapper<>(CustomerDetails.class));
+
+                if(!listData.isEmpty() && listData.size()>0) {
+                    customerDetails = listData.get(0);
+                }else{
+                    customerDetails = null;
+                }
+
                 Duration duration = Duration.between(otpDetails.getOtpExprTime(), LocalDateTime.now());
-                customerDetails = (duration.toMinutes() > 5) ? null : customerDetailsRepository.findCustomerDetailByMobile(mobileNo);
+                customerDetails = (duration.toMinutes() > 5) ? null : customerDetails;
             } else {
                 customerDetails = null;
             }
@@ -114,14 +122,6 @@ public class CustomerServiceIMPL implements CoustomerService {
         }
 
         return customerDetails;
-    }
-
-    @Override
-    public ReqStrDetails getReqStrDetailsByCustomerAccountNo(String customerAccountNo) {
-
-        ReqStrDetails reqStrDetailsData = new ReqStrDetails();
-        reqStrDetailsData = reqStrDetailsRepository.findByReqStrDetailsByCustomerAccountNo(customerAccountNo);
-        return reqStrDetailsData;
     }
 
 

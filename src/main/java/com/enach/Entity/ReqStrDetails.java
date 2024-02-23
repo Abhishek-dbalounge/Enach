@@ -13,7 +13,7 @@ import lombok.Setter;
 public class ReqStrDetails {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "req_id")
     private Long reqId;
 
@@ -103,6 +103,7 @@ public class ReqStrDetails {
 
     @Column(name = "filler10")
     private String filler10;
+
 
 
 }

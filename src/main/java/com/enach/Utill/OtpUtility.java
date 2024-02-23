@@ -1,7 +1,6 @@
 package com.enach.Utill;
 
 
-import com.enach.Entity.CustomerDetails;
 import com.enach.Repository.OtpDetailsRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,12 +31,13 @@ public class OtpUtility {
     private OtpDetailsRepository otpDetailsRepository;
     private Logger logger = LoggerFactory.getLogger(OncePerRequestFilter.class);
 
-    public int generateOtp(CustomerDetails customerDetails)
-    {
+    public int generateCustOtp(com.enach.Models.CustomerDetails customerDetails) {
+
         String mobileNo = customerDetails.getMobileNo();
         int count = otpDetailsRepository.countMobileNo(mobileNo);
 
         if (count > 0) {
+
             String mobileNo1 = customerDetails.getMobileNo();
             otpDetailsRepository.deletePrevOtp(mobileNo1);
             logger.info("previous otp deleted");
@@ -47,7 +47,6 @@ public class OtpUtility {
         System.out.println("===RAMDOM==="+randomNo);
         return randomNo;
     }
-
 
     public boolean sendOtp(String mobileNo, int otpCode)
     {
@@ -67,4 +66,6 @@ public class OtpUtility {
         }
         return status;
     }
+
+
 }
