@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -61,8 +62,20 @@ private CoustomerService coustomerService;
                     otpVerifyResponse.setLoanNo(customerDetails.getLoanNo());
                     otpVerifyResponse.setMobileNo(customerDetails.getMobileNo());
                     otpVerifyResponse.setEmail(customerDetails.getEmail());
-                    otpVerifyResponse.setStartDate(customerDetails.getStartDate());
-                    otpVerifyResponse.setExpiryDate(customerDetails.getExpiryDate());
+
+                    LocalDate startDate = customerDetails.getStartDate();
+                    LocalDate today = LocalDate.now();
+                    if(startDate.isBefore(today)){
+                        otpVerifyResponse.setStartDate(today);
+                    }else{
+                        otpVerifyResponse.setStartDate(startDate);
+                    }
+
+                    LocalDate expiryDate = customerDetails.getExpiryDate();
+                    LocalDate today1 = LocalDate.now();
+                    if(expiryDate.isAfter(today1)){
+                        otpVerifyResponse.setExpiryDate(expiryDate);
+                    }
                     otpVerifyResponse.setCustDebitAmount(customerDetails.getCustDebitAmount());
                     return new ResponseEntity(otpVerifyResponse, HttpStatus.OK);
 
@@ -81,5 +94,7 @@ private CoustomerService coustomerService;
 
         }
     }
+
+
 
 }

@@ -2,6 +2,7 @@ package com.enach.Models;
 
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @Data
@@ -11,8 +12,8 @@ public class OtpVerifyResponse extends CommonResponse {
     private String loanNo;
     private String mobileNo;
     private String email;
-    private Date startDate;
-    private Date expiryDate;
+    private LocalDate startDate;
+    private LocalDate expiryDate;
     private Double custDebitAmount;
 
 

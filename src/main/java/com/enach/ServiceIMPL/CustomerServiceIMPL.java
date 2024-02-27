@@ -103,6 +103,7 @@ public class CustomerServiceIMPL implements CoustomerService {
         try {
             OtpDetails otpDetails = otpDetailsRepository.IsotpExpired(mobileNo, otpCode);
             if (otpDetails != null) {
+
                 String sql = "SELECT * FROM customer_details WHERE mobile_no='"+mobileNo+"';";
                 List<CustomerDetails> listData = jdbcTemplate.query(sql,new BeanPropertyRowMapper<>(CustomerDetails.class));
 
@@ -123,6 +124,7 @@ public class CustomerServiceIMPL implements CoustomerService {
 
         return customerDetails;
     }
+
 
 
 }

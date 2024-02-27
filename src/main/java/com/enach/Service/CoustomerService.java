@@ -3,6 +3,7 @@ package com.enach.Service;
 
 
 import com.enach.Models.CustomerDetails;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
 
